@@ -160,12 +160,12 @@ window.MathJax = {
 <div id="testNumerasi" class="test-item">Numerasi<br><small>Menunggu</small></div>
 <div id="testLiterasi" class="test-item">Literasi<br><small>Menunggu</small></div>
 <div id="testKarakter" class="test-item">Karakter<br><small>Menunggu</small></div></aside>
-<main class="main"><div class="topbar"><div class="title"><h1>SMP Kristen Masa Depan Cerah</h1><p>Portal Matrikulasi Siswa Baru</p></div></div>
-<section id="loginView" class="card login-wrap"><h2>Identitas Peserta</h2><p class="muted">Isi data siswa. Setelah mulai, data akan dikunci pada perangkat ini.</p>
+<main class="main"><div class="topbar"><div class="title"><h1>SMP Kristen Masa Depan Cerah</h1><p>Matrikulasi Siswa Baru</p></div></div>
+<section id="loginView" class="card login-wrap"><h2>Identitas Peserta</h2><p class="muted">Isi data siswa. Setelah simpan, data akan dikunci pada perangkat ini.</p>
 <label>Nama Lengkap</label><input id="fullName" placeholder="Contoh: Didi Jeremiah">
 <label>Asal Sekolah</label><input id="schoolOrigin" placeholder="Contoh: SD Kristen Masa Depan Cerah">
 <label>Tanggal Lahir</label><input id="birthDate" type="date">
-<button onclick="register()">Mulai</button><div class="statusline" id="loginStatus"></div></section>
+<button onclick="register()">Simpan</button><div class="statusline" id="loginStatus"></div></section>
 <section id="waitingView" class="card hidden"><div class="center"><div class="bigmsg" id="waitingText">Please Prepare for Numeration Test...</div><p class="muted">Silakan tunggu instruksi guru. Halaman akan berubah otomatis saat tes dimulai.</p></div></section>
 <section id="examView" class="hidden"><div class="exam-layout"><div class="card question-box"><div class="q-meta"><div class="q-title" id="examTitle">Tes</div><button id="flagBtn" class="secondary" onclick="toggleFlag()">🚩 Flag</button></div>
 <div class="q-title" id="questionNo">Soal 1</div><div class="q-text" id="questionText"></div><img id="questionImage" class="q-img hidden"><div id="optionsBox"></div>
@@ -179,7 +179,7 @@ window.MathJax = {
 </main></div>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbxcV5TwDUZ3usN4-8ZbqcmDB0aBs_LQBZeLOya5UmTrTKvox7oV05phP5hbYUhWk2SWNg/exec";
-let participant=JSON.parse(localStorage.getItem("participant")||"null"), currentTest=null, questions=[], answers={}, currentIndex=0, pollTimer=null, countdownTimer=null, testStartTime=null, durationSeconds=0, flags=JSON.parse(localStorage.getItem("flags")||"{}");let isSubmitting=false;
+let participant=JSON.parse(localStorage.getItem("participant")||"null"), currentTest=null, questions=[], answers={}, currentIndex=0, pollTimer=null, countdownTimer=null, participantValidationTimer=null, testStartTime=null, durationSeconds=0, flags=JSON.parse(localStorage.getItem("flags")||"{}");let isSubmitting=false;
 let settings = {};
 function escapePlainText(str){
   return String(str || "")
@@ -241,7 +241,42 @@ function typesetMath(){
 }
 function show(id){["loginView","waitingView","examView","finishView"].forEach(x=>document.getElementById(x).classList.add("hidden"));
     document.getElementById(id).classList.remove("hidden")}
-function api(params){return fetch(API_URL+"?"+new URLSearchParams(params).toString()).then(r=>r.json())}
+function api(params){
+  return new Promise((resolve,reject)=>{
+    const callbackName = "__mdcJsonp_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+    const script = document.createElement("script");
+    const timeout = setTimeout(()=>{
+      cleanup();
+      reject(new Error("Koneksi ke server timeout."));
+    },20000);
+
+    function cleanup(){
+      clearTimeout(timeout);
+      if(script.parentNode) script.parentNode.removeChild(script);
+      try{ delete window[callbackName]; }catch(e){ window[callbackName]=undefined; }
+    }
+
+    window[callbackName] = function(data){
+      cleanup();
+      resolve(data);
+    };
+
+    const query = new URLSearchParams({
+      ...params,
+      callback: callbackName,
+      _ts: Date.now()
+    });
+
+    script.src = API_URL + "?" + query.toString();
+    script.async = true;
+    script.onerror = function(){
+      cleanup();
+      reject(new Error("Gagal terhubung ke backend."));
+    };
+
+    document.body.appendChild(script);
+  });
+}
 function getDeviceId(){let id=localStorage.getItem("device_id");if(!id){id="D"+Math.random().toString(36).slice(2)+Date.now();
     localStorage.setItem("device_id",id)}return id}
 async function register(){const fullName=document.getElementById("fullName").value.trim(),schoolOrigin=document.getElementById("schoolOrigin").value.trim(),birthDate=document.getElementById("birthDate").value;
@@ -250,12 +285,17 @@ async function register(){const fullName=document.getElementById("fullName").val
         const res=await api({action:"register",full_name:fullName,school_origin:schoolOrigin,birth_date:birthDate,device_id:getDeviceId()});
             if(!res.success){loginStatus.textContent=res.message||"Gagal register.";
             return}participant=res.data;localStorage.setItem("participant",JSON.stringify(participant));initParticipant()}
-function initParticipant(){
+async function initParticipant(){
   sideName.textContent=participant.full_name;
   sideSchool.textContent=participant.school_origin;
-  waitingText.textContent = "Memuat status tes...";
+  waitingText.textContent = "Memeriksa data peserta...";
   show("waitingView");
+
+  const valid = await validateStoredParticipant();
+  if(!valid) return;
+
   startPolling();
+  startParticipantValidation();
 }
 function startPolling(){
   if(pollTimer)clearInterval(pollTimer);
@@ -654,12 +694,18 @@ async function submitTest(isTimeUp = false) {
 }
 
 async function validateStoredParticipant() {
-  const participantId =
-    localStorage.getItem("participant_id") ||
-    localStorage.getItem("mdc_participant_id") ||
-    "";
+  const storedParticipant =
+    participant ||
+    JSON.parse(localStorage.getItem("participant") || "null");
 
-  if (!participantId) return;
+  const participantId = String(
+    storedParticipant?.participant_id || ""
+  ).trim();
+
+  if (!participantId) {
+    resetDeletedParticipant();
+    return false;
+  }
 
   try {
     const res = await api({
@@ -667,18 +713,94 @@ async function validateStoredParticipant() {
       participant_id: participantId
     });
 
-    if (res.success && !res.exists) {
-      clearStudentDeviceData();
-      location.reload();
+    if (res && res.success && res.exists === false) {
+      resetDeletedParticipant();
+      return false;
     }
+
+    // Bila backend sedang bermasalah, jangan langsung menghapus data siswa.
+    // Data hanya di-reset jika server dengan jelas menjawab exists:false.
+    return true;
+
   } catch (error) {
     console.warn("Validasi peserta gagal:", error);
+    return true;
   }
 }
 
-function clearStudentDeviceData() {
-  localStorage.clear();
+function startParticipantValidation(){
+  if(participantValidationTimer){
+    clearInterval(participantValidationTimer);
+  }
+
+  participantValidationTimer = setInterval(async ()=>{
+    if(!participant) return;
+    await validateStoredParticipant();
+  },5000);
+}
+
+function resetDeletedParticipant(){
+  if(pollTimer){
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  if(countdownTimer){
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+
+  if(participantValidationTimer){
+    clearInterval(participantValidationTimer);
+    participantValidationTimer = null;
+  }
+
+  // Pertahankan device_id, hapus seluruh data yang terkait peserta lama.
+  const deviceId = localStorage.getItem("device_id");
+  const keys = Object.keys(localStorage);
+
+  keys.forEach(key=>{
+    if(key !== "device_id"){
+      localStorage.removeItem(key);
+    }
+  });
+
+  if(deviceId){
+    localStorage.setItem("device_id",deviceId);
+  }
+
   sessionStorage.clear();
+
+  participant = null;
+  currentTest = null;
+  questions = [];
+  answers = {};
+  flags = {};
+  currentIndex = 0;
+  testStartTime = null;
+  durationSeconds = 0;
+  isSubmittingTest = false;
+
+  sideName.textContent = "Belum terdaftar";
+  sideSchool.textContent = "";
+
+  ["Numerasi","Literasi","Karakter"].forEach(name=>{
+    const el = document.getElementById("test"+name);
+    el.className = "test-item";
+    el.innerHTML = name + "<br><small>Menunggu</small>";
+  });
+
+  document.getElementById("fullName").value = "";
+  document.getElementById("schoolOrigin").value = "";
+  document.getElementById("birthDate").value = "";
+  document.getElementById("loginStatus").textContent =
+    "Data peserta sebelumnya telah dihapus oleh guru. Silakan daftar kembali.";
+
+  show("loginView");
+}
+
+function clearStudentDeviceData() {
+  resetDeletedParticipant();
 }
 
 function updateSideStatus(test,status){
