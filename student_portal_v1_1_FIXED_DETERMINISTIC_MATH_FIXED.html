@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MDC Matriculation - Student Portal</title>
+<style>
+  .option{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:#fff;
+  color:#0b1f3a;
+  border:1px solid #cfd9e6;
+  border-radius:12px;
+  padding:14px 16px;
+  margin:10px 0;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.option b{
+  color:#0b1f3a;
+  margin-right:6px;
+}
+
+.option.selected{
+  background:#eaf3ff;
+  border-color:#2f80ed;
+  color:#0b1f3a;
+}
+    /* ===== REVIEW MODAL ===== */
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+}
+
+.modal.hidden{
+    display:none;
+}
+
+.modal-box{
+    width:420px;
+    max-width:90%;
+    background:#fff;
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 20px 50px rgba(0,0,0,.18);
+    animation:pop .18s ease;
+}
+
+@keyframes pop{
+    from{
+        transform:scale(.95);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+.modal-box h2{
+    margin:0;
+    font-size:28px;
+    color:#183153;
+}
+
+.modal-box p{
+    color:#666;
+    margin-top:8px;
+    margin-bottom:25px;
+}
+
+.review-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 0;
+    border-bottom:1px solid #eee;
+    font-size:17px;
+}
+
+.review-row b{
+    color:#1b5fd1;
+}
+
+.modal-actions{
+    margin-top:28px;
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+}
+
+.modal-actions button{
+    padding:12px 22px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+}
+
+.modal-actions .secondary{
+    background:#eceff3;
+}
+
+.modal-actions button:last-child{
+    background:#1b5fd1;
+    color:white;
+}
+:root{--blue:#2f80ed;--dark:#1f2d3d;--soft:#f4f7fb;--muted:#7b8794;--green:#2ecc71}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--soft);color:var(--dark)}
+.page{min-height:100vh;display:flex}.sidebar{width:245px;background:#eaf3ff;padding:24px 18px;border-right:1px solid #d8e7fa}
+.logo{font-weight:800;font-size:26px;color:#1b5fae}.sublogo{font-size:13px;color:#4c6f91;margin:8px 0 28px}
+.side-card,.card,.nav-panel{background:#fff;border-radius:22px;box-shadow:0 8px 28px rgba(31,45,61,.08)}
+.side-card{padding:16px;margin-bottom:14px}.test-item{padding:14px;border-radius:12px;margin-bottom:10px;background:#dce5ee;color:#728091;font-weight:700}
+.test-item.active{background:#fff;color:#1f2d3d;border:2px solid var(--blue)}.test-item.done{background:#dcf8e7;color:#207a43}
+.main{flex:1;padding:28px}.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title h1{margin:0;font-size:26px}.title p{margin:6px 0 0;color:var(--muted)}
+.card{padding:26px}.login-wrap{max-width:560px;margin:60px auto}label{font-weight:700;font-size:14px;margin-bottom:7px;display:block}
+input,textarea{width:100%;padding:14px;border:1px solid #d8e0ea;border-radius:12px;font-size:16px;margin-bottom:16px}
+button{border:0;border-radius:12px;background:var(--blue);color:#fff;padding:13px 20px;font-weight:700;cursor:pointer}
+button.secondary{background:#e8eef5;color:#1f2d3d}.center{text-align:center;padding:80px 20px}.bigmsg{font-size:30px;font-weight:800;margin-bottom:14px}.muted{color:var(--muted)}
+.exam-layout{display:grid;grid-template-columns:1fr 250px;gap:20px}.question-box{min-height:520px}.q-meta{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.q-title{font-weight:800;font-size:20px}
+.q-text{font-size:20px;line-height:1.55;margin:22px 0}.q-img{max-width:100%;border-radius:14px;margin:10px 0 20px}
+.option{border:2px solid #d8e0ea;border-radius:14px;padding:14px 16px;margin-bottom:12px;cursor:pointer;background:#fff}.option:hover{border-color:var(--blue)}.option.selected{background:#e9f3ff;border-color:var(--blue)}
+.nav-panel{padding:18px}.timer{font-size:32px;font-weight:900;text-align:center;padding:16px;border-radius:16px;background:#f0f6ff;color:#1b5fae;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.num{padding:10px 0;border-radius:10px;background:#e9eef5;color:#1f2d3d;text-align:center;font-weight:800;cursor:pointer}.num.active{background:var(--blue);color:#fff}.num.answered{background:#dff7e8;color:#207a43}.num.flagged{outline:3px solid #f39c12}.num.active{background:var(--blue);color:#fff}
+.actions{display:flex;gap:10px;margin-top:22px;justify-content:space-between}#nextBtn{margin-left:auto}.statusline{font-size:13px;color:var(--muted);margin-top:10px}.hidden{display:none!important}
+@media(max-width:850px){.page{display:block}.sidebar{width:100%;border-right:0}.main{padding:16px}.exam-layout{grid-template-columns:1fr}.login-wrap{margin:20px auto}}
+
+.q-text p{margin:0 0 10px}
+.q-text ul,.q-text ol{padding-left:26px;margin:8px 0 12px}
+.q-text li{margin:4px 0}
+.q-text strong,.q-text b{font-weight:800}
+
+</style>
+
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['\\(', '\\)'], ['$', '$']],
+    displayMath: [['\\[', '\\]'], ['$$', '$$']]
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<div class="page">
+<aside class="sidebar"><div class="logo">MDC</div><div class="sublogo">Matriculation System</div>
+<div class="side-card"><b>Peserta</b><div class="muted" id="sideName">Belum terdaftar</div><div class="muted" id="sideSchool"></div></div>
+<div id="testNumerasi" class="test-item">Numerasi<br><small>Menunggu</small></div>
+<div id="testLiterasi" class="test-item">Literasi<br><small>Menunggu</small></div>
+<div id="testKarakter" class="test-item">Karakter<br><small>Menunggu</small></div></aside>
+<main class="main"><div class="topbar"><div class="title"><h1>SMP Kristen Masa Depan Cerah</h1><p>Portal Matrikulasi Siswa Baru</p></div></div>
+<section id="loginView" class="card login-wrap"><h2>Identitas Peserta</h2><p class="muted">Isi data siswa. Setelah mulai, data akan dikunci pada perangkat ini.</p>
+<label>Nama Lengkap</label><input id="fullName" placeholder="Contoh: Didi Jeremiah">
+<label>Asal Sekolah</label><input id="schoolOrigin" placeholder="Contoh: SD Kristen Masa Depan Cerah">
+<label>Tanggal Lahir</label><input id="birthDate" type="date">
+<button onclick="register()">Mulai</button><div class="statusline" id="loginStatus"></div></section>
+<section id="waitingView" class="card hidden"><div class="center"><div class="bigmsg" id="waitingText">Please Prepare for Numeration Test...</div><p class="muted">Silakan tunggu instruksi guru. Halaman akan berubah otomatis saat tes dimulai.</p></div></section>
+<section id="examView" class="hidden"><div class="exam-layout"><div class="card question-box"><div class="q-meta"><div class="q-title" id="examTitle">Tes</div><button id="flagBtn" class="secondary" onclick="toggleFlag()">🚩 Flag</button></div>
+<div class="q-title" id="questionNo">Soal 1</div><div class="q-text" id="questionText"></div><img id="questionImage" class="q-img hidden"><div id="optionsBox"></div>
+<textarea id="essayBox" class="hidden" rows="8" placeholder="Tulis jawaban essay di sini..." oninput="essayAutoSave()"></textarea>
+<div class="actions">
+  <button id="prevBtn" class="secondary" onclick="prevQuestion()">Sebelumnya</button>
+  <button id="nextBtn" onclick="nextQuestion()">Berikutnya</button>
+</div><div class="statusline" id="saveStatus">Auto-save aktif</div></div>
+<aside class="nav-panel"><div class="timer" id="timer">--:--</div><div class="grid" id="numberGrid"></div><div class="statusline">Hijau = sudah dijawab<br>Biru = nomor aktif</div></aside></div></section>
+<section id="finishView" class="card hidden"><div class="center"><div class="bigmsg">Terima kasih</div><p class="muted">Seluruh proses matrikulasi pada perangkat ini telah selesai.</p></div></section>
+</main></div>
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxcV5TwDUZ3usN4-8ZbqcmDB0aBs_LQBZeLOya5UmTrTKvox7oV05phP5hbYUhWk2SWNg/exec";
+let participant=JSON.parse(localStorage.getItem("participant")||"null"), currentTest=null, questions=[], answers={}, currentIndex=0, pollTimer=null, countdownTimer=null, testStartTime=null, durationSeconds=0, flags=JSON.parse(localStorage.getItem("flags")||"{}");let isSubmitting=false;
+let settings = {};
+function escapePlainText(str){
+  return String(str || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;")
+    .replaceAll("\r\n","\n")
+    .replaceAll("\n","<br>");
+}
+
+function sanitizeQuestionHtml(html){
+  const template = document.createElement("template");
+  template.innerHTML = String(html || "");
+
+  const allowedTags = new Set([
+    "B","STRONG","I","EM","U","BR","P","DIV","UL","OL","LI","SPAN",
+    "SUP","SUB"
+  ]);
+
+  const walker = document.createTreeWalker(
+    template.content,
+    NodeFilter.SHOW_ELEMENT
+  );
+
+  const elements = [];
+  while(walker.nextNode()) elements.push(walker.currentNode);
+
+  elements.forEach(el=>{
+    if(!allowedTags.has(el.tagName)){
+      el.replaceWith(...el.childNodes);
+      return;
+    }
+
+    [...el.attributes].forEach(attr=>{
+      el.removeAttribute(attr.name);
+    });
+  });
+
+  return template.innerHTML;
+}
+
+function formatText(str){
+  const value = String(str || "");
+  const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(value);
+
+  return looksLikeHtml
+    ? sanitizeQuestionHtml(value)
+    : escapePlainText(value);
+}
+function typesetMath(){
+  if(window.MathJax && MathJax.typesetPromise){
+    MathJax.typesetPromise([
+      document.getElementById("questionText"),
+      document.getElementById("optionsBox")
+    ]).catch(function(err){ console.error(err); });
+  }
+}
+function show(id){["loginView","waitingView","examView","finishView"].forEach(x=>document.getElementById(x).classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden")}
+function api(params){return fetch(API_URL+"?"+new URLSearchParams(params).toString()).then(r=>r.json())}
+function getDeviceId(){let id=localStorage.getItem("device_id");if(!id){id="D"+Math.random().toString(36).slice(2)+Date.now();
+    localStorage.setItem("device_id",id)}return id}
+async function register(){const fullName=document.getElementById("fullName").value.trim(),schoolOrigin=document.getElementById("schoolOrigin").value.trim(),birthDate=document.getElementById("birthDate").value;
+    if(!fullName||!schoolOrigin||!birthDate){loginStatus.textContent="Lengkapi semua identitas dulu.";
+        return}loginStatus.textContent="Mendaftarkan peserta...";
+        const res=await api({action:"register",full_name:fullName,school_origin:schoolOrigin,birth_date:birthDate,device_id:getDeviceId()});
+            if(!res.success){loginStatus.textContent=res.message||"Gagal register.";
+            return}participant=res.data;localStorage.setItem("participant",JSON.stringify(participant));initParticipant()}
+function initParticipant(){
+  sideName.textContent=participant.full_name;
+  sideSchool.textContent=participant.school_origin;
+  waitingText.textContent = "Memuat status tes...";
+  show("waitingView");
+  startPolling();
+}
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  checkSettings();
+  pollTimer=setInterval(checkSettings,3000);
+}
+async function checkSettings(){
+  const res = await api({action:"settings"});
+  if(!res.success) return;
+
+  const s = res.data;
+  settings = res.data || {};
+  const test = (s.current_test || "NONE").toUpperCase();
+  const status = (s.test_status || "WAITING").toUpperCase();
+
+  updateSideStatus(test, status);
+
+  const submittedStatus = test + "_SUBMITTED";
+
+  // PRIORITAS RUNNING: saat guru memulai sesi baru, portal harus benar-benar
+  // membuka tes, meskipun perangkat ini menyimpan status submit dari uji sebelumnya.
+  if(status === "RUNNING" && ["NUMERASI","LITERASI","KARAKTER"].includes(test)){
+    if(currentTest !== test){
+      await startExam(test, Number(s[test.toLowerCase()+"_duration"] || 60));
+    }
+    return;
+  }
+
+  if(participant && participant.status === submittedStatus){
+    markCompleted(test);
+    updateSideStatus(test, status);
+
+    if(test === "KARAKTER"){
+      showFinishScreen("Seluruh rangkaian matrikulasi telah selesai. Jawabanmu sudah berhasil dikumpulkan.");
+    }else{
+      waitingText.textContent = "Jawaban berhasil dikumpulkan. Silakan tunggu instruksi guru untuk tes berikutnya.";
+      show("waitingView");
+    }
+    return;
+  }
+
+  if(status === "FINISHED" && currentTest){
+    await submitTest();
+    return;
+  }
+
+  if(status !== "RUNNING"){
+    currentTest = null;
+    renderWaitingByProgress(test);
+  }
+}
+function getCompletedTests(){
+  return JSON.parse(localStorage.getItem("completedTests") || "[]");
+}
+
+function markCompleted(test){
+  const completed = getCompletedTests();
+  if(!completed.includes(test)){
+    completed.push(test);
+    localStorage.setItem("completedTests", JSON.stringify(completed));
+  }
+}
+function renderWaitingByProgress(test){
+  let text="Please Prepare for Numeration Test...";
+  if(test==="NUMERASI") text="Please Prepare for Numeration Test...";
+  if(test==="LITERASI") text="Please Prepare for Literation Test...";
+  if(test==="KARAKTER") text="Please Prepare for Character Test...";
+  if(test==="NONE") text="Please wait for the test to begin...";
+
+  waitingText.textContent=text;
+  show("waitingView");
+}
+async function startExam(test,durationMinutes){
+  isSubmittingTest = false;
+  currentTest=test;
+  currentIndex=0;
+  durationSeconds=durationMinutes*60;
+
+  // Timer dipisahkan per peserta dan per jenis tes.
+  // Ini mencegah start time lama dari peserta/simulasi sebelumnya terbaca lagi.
+  const participantKey = participant?.participant_id || getDeviceId();
+  const startKey = "startTime_" + participantKey + "_" + test;
+
+  const completed = getCompletedTests();
+  const wasSubmitted = participant && participant.status === test + "_SUBMITTED";
+
+  // Guru sedang memulai sesi RUNNING baru. Bersihkan jejak sesi lama
+  // untuk tes aktif ini agar timer dimulai dari durasi penuh.
+  if(completed.includes(test) || wasSubmitted){
+    localStorage.removeItem(startKey);
+    const nextCompleted = completed.filter(item => item !== test);
+    localStorage.setItem("completedTests", JSON.stringify(nextCompleted));
+    participant.status = "ACTIVE";
+    localStorage.setItem("participant", JSON.stringify(participant));
+  }
+
+  let savedStart = localStorage.getItem(startKey);
+
+  if(!savedStart){
+    savedStart = String(Date.now());
+    localStorage.setItem(startKey, savedStart);
+  }
+
+  testStartTime = Number(savedStart);
+
+  waitingText.textContent = "Memuat soal " + test + "...";
+  show("waitingView");
+
+  try{
+    const qRes=await api({
+      action:"question",
+      test_type:test,
+      participant_id:participant.participant_id
+    });
+
+    const aRes=await api({
+      action:"getAnswers",
+      test_type:test,
+      participant_id:participant.participant_id
+    });
+
+    questions = qRes?.data?.questions || [];
+    answers = aRes?.data || {};
+
+    if(questions.length===0){
+      waitingText.textContent = "Soal " + test + " belum tersedia.";
+      show("waitingView");
+      return;
+    }
+
+    show("examView");
+    renderQuestion();
+    startCountdown();
+
+  }catch(err){
+    waitingText.textContent = "Gagal memuat soal.";
+    console.error(err);
+  }
+}
+function startCountdown(){
+  if(countdownTimer) clearInterval(countdownTimer);
+
+  const tick = ()=>{
+    const elapsed=Math.floor((Date.now()-testStartTime)/1000);
+    const remaining=durationSeconds-elapsed;
+
+    if(remaining<=0){
+      timer.textContent="00:00";
+      clearInterval(countdownTimer);
+      submitTest(true);
+      return;
+    }
+
+    const m=Math.floor(remaining/60);
+    const s=remaining%60;
+    timer.textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  };
+
+  tick();
+  countdownTimer=setInterval(tick,1000);
+}
+function renderQuestion(){
+  const q = questions[currentIndex];
+  if(!q) return;
+
+  examTitle.textContent = "Tes " + currentTest;
+  questionNo.textContent = "Soal " + (currentIndex + 1) + " dari " + questions.length;
+  questionText.innerHTML = formatText(q.question_html || "");
+
+  if(q.media_url){
+    questionImage.src = q.media_url;
+    questionImage.classList.remove("hidden");
+  }else{
+    questionImage.classList.add("hidden");
+  }
+
+  renderAnswerInput(q);
+
+  document.getElementById("flagBtn").textContent = flags[q.question_id] ? "✅ Flagged" : "🚩 Flag";
+
+  prevBtn.style.visibility = currentIndex === 0 ? "hidden" : "visible";
+  nextBtn.textContent = currentIndex === questions.length - 1 ? "Selesai Tes" : "Berikutnya";
+
+  renderNumberGrid();
+  typesetMath();
+}
+function renderAnswerInput(q){
+  optionsBox.innerHTML = "";
+  essayBox.classList.add("hidden");
+
+  const type = String(q.question_type || "").trim().toUpperCase();
+
+  if(type === "ESSAY"){
+    essayBox.classList.remove("hidden");
+    essayBox.value = answers[q.question_id]?.answer || "";
+    return;
+  }
+
+  let opts = [
+    {key:"A", text:q.option_a},
+    {key:"B", text:q.option_b},
+    {key:"C", text:q.option_c},
+    {key:"D", text:q.option_d},
+    {key:"E", text:q.option_e}
+  ].filter(o => String(o.text || "").trim() !== "");
+
+  const shuffleOn = settings.shuffle_option === true || String(settings.shuffle_option).toUpperCase() === "TRUE";
+
+  // Shuffle dibuat deterministik per perangkat + per soal.
+  // Jadi tiap siswa bisa berbeda, tapi saat pindah soal / refresh, urutannya tetap sama.
+  if(shuffleOn){
+    opts = deterministicShuffle(opts, getDeviceId() + "_" + currentTest + "_" + q.question_id);
+  }
+
+  opts.forEach((o, i)=>{
+    const displayLetter = String.fromCharCode(65 + i);
+    const btn = document.createElement("button");
+    btn.className = "option" + (answers[q.question_id]?.answer === o.key ? " selected" : "");
+    btn.innerHTML = "<b>" + displayLetter + ".</b> " + formatText(o.text);
+    btn.onclick = () => selectOption(q, o.key);
+    optionsBox.appendChild(btn);
+  });
+}
+function hashString(str){
+  let h = 2166136261;
+  str = String(str || "");
+  for(let i=0; i<str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function seededRandom(seed){
+  let x = seed >>> 0;
+  return function(){
+    x += 0x6D2B79F5;
+    let t = x;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function deterministicShuffle(arr, seedText){
+  const a = arr.slice();
+  const rand = seededRandom(hashString(seedText));
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+async function selectOption(q,letter){let ans=letter;if(q.question_type==="CMC"){let arr=answers[q.question_id]?.answer?answers[q.question_id].answer.split(","):[];if(arr.includes(letter))arr=arr.filter(x=>x!==letter);else arr.push(letter);ans=arr.sort().join(",")}answers[q.question_id]={answer:ans};renderQuestion();await saveAnswer(q.question_id,ans)}
+let essaySaveTimeout=null;function essayAutoSave(){clearTimeout(essaySaveTimeout);essaySaveTimeout=setTimeout(async()=>{const q=questions[currentIndex],ans=essayBox.value;answers[q.question_id]={answer:ans};await saveAnswer(q.question_id,ans);renderNumberGrid()},700)}
+async function saveAnswer(questionId,answer){saveStatus.textContent="Menyimpan...";const res=await api({action:"answer",participant_id:participant.participant_id,test_type:currentTest,question_id:questionId,answer:answer,time_spent:""});saveStatus.textContent=res.success?"✔ Tersimpan":"Gagal menyimpan"}
+function renderNumberGrid(){numberGrid.innerHTML="";questions.forEach((q,i)=>{const d=document.createElement("div");d.className="num";if(i===currentIndex)d.classList.add("active");if(answers[q.question_id]?.answer)d.classList.add("answered");if(flags[q.question_id])d.classList.add("flagged");d.textContent=i+1;d.onclick=()=>{currentIndex=i;renderQuestion()};numberGrid.appendChild(d)})}
+function prevQuestion(){
+  if(currentIndex > 0){
+    currentIndex--;
+    renderQuestion();
+  }
+}
+
+async function saveCurrentAnswer(){
+  const q = questions[currentIndex];
+  if(!q) return;
+
+  const type = String(q.question_type || "").trim().toUpperCase();
+
+  if(type === "ESSAY"){
+    const ans = essayBox.value || "";
+    answers[q.question_id] = {answer: ans};
+    await saveAnswer(q.question_id, ans);
+  }
+}
+
+function nextQuestion() {
+  if (currentIndex < questions.length - 1) {
+    saveCurrentAnswer();
+    currentIndex++;
+    renderQuestion();
+    return;
+  }
+
+  showReview();
+}
+function showReview(){
+  const total = questions.length;
+  const answered = questions.filter(q => answers[q.question_id]?.answer).length;
+  const unanswered = total - answered;
+
+  document.getElementById("reviewTotal").textContent = total;
+  document.getElementById("reviewAnswered").textContent = answered;
+  document.getElementById("reviewUnanswered").textContent = unanswered;
+
+  document.getElementById("reviewModal").classList.remove("hidden");
+}
+function closeReview(){
+  document.getElementById("reviewModal").classList.add("hidden");
+}
+
+function confirmSubmit(){
+  document.getElementById("reviewModal").classList.add("hidden");
+  submitTest();
+}
+function toggleFlag(){const q=questions[currentIndex];flags[q.question_id]=!flags[q.question_id];localStorage.setItem("flags",JSON.stringify(flags));renderQuestion()}
+
+function showFinishScreen(message) {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  const finishView = document.getElementById("finishView");
+
+  const bigMessage =
+    finishView?.querySelector(".bigmsg");
+
+  const description =
+    finishView?.querySelector(".muted");
+
+  if (bigMessage) {
+    bigMessage.textContent = "Terima Kasih";
+  }
+
+  if (description) {
+    description.textContent =
+      message ||
+      "Seluruh rangkaian tes telah selesai. Jawabanmu sudah berhasil disimpan.";
+  }
+
+  show("finishView");
+}
+
+let isSubmittingTest = false;
+
+async function submitTest(isTimeUp = false) {
+  if (isSubmittingTest || !currentTest) return;
+
+  isSubmittingTest = true;
+  const submittedTest = currentTest;
+
+  try {
+    await saveCurrentAnswer();
+
+    const res = await api({
+      action: "submitTest",
+      participant_id: participant.participant_id,
+      test_type: submittedTest
+    });
+
+    if (!res.success) {
+      isSubmittingTest = false;
+      alert(res.message || "Jawaban belum berhasil dikumpulkan. Silakan coba kembali.");
+      return;
+    }
+
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+
+    participant.status = submittedTest + "_SUBMITTED";
+    localStorage.setItem("participant", JSON.stringify(participant));
+
+    const participantKey = participant?.participant_id || getDeviceId();
+    localStorage.removeItem("startTime_" + participantKey + "_" + submittedTest);
+
+    markCompleted(submittedTest);
+    updateSideStatus(submittedTest, "RUNNING");
+
+    if (submittedTest === "KARAKTER") {
+      showFinishScreen(
+        isTimeUp
+          ? "Waktu telah habis. Jawabanmu sudah dikumpulkan otomatis. Seluruh rangkaian matrikulasi telah selesai."
+          : "Seluruh rangkaian matrikulasi telah selesai. Jawabanmu sudah berhasil dikumpulkan."
+      );
+      return;
+    }
+
+    waitingText.textContent = isTimeUp
+      ? "Waktu telah habis. Jawaban berhasil disimpan. Silakan tunggu instruksi guru untuk tes berikutnya."
+      : "Tes " +submittedTest+ " selesai lebih awal. Jawaban berhasil disimpan. Silakan tunggu instruksi guru untuk tes berikutnya.";
+
+    show("waitingView");
+
+  } catch (error) {
+    console.error("Gagal submit test:", error);
+    isSubmittingTest = false;
+    alert("Terjadi kesalahan saat mengumpulkan tes. Periksa koneksi lalu coba kembali.");
+  }
+}
+
+async function validateStoredParticipant() {
+  const participantId =
+    localStorage.getItem("participant_id") ||
+    localStorage.getItem("mdc_participant_id") ||
+    "";
+
+  if (!participantId) return;
+
+  try {
+    const res = await api({
+      action: "checkParticipant",
+      participant_id: participantId
+    });
+
+    if (res.success && !res.exists) {
+      clearStudentDeviceData();
+      location.reload();
+    }
+  } catch (error) {
+    console.warn("Validasi peserta gagal:", error);
+  }
+}
+
+function clearStudentDeviceData() {
+  localStorage.clear();
+  sessionStorage.clear();
+}
+
+function updateSideStatus(test,status){
+  const names = ["Numerasi","Literasi","Karakter"];
+  const completed = getCompletedTests();
+
+  names.forEach(name=>{
+    const el = document.getElementById("test"+name);
+    const key = name.toUpperCase();
+
+    el.className = "test-item";
+
+    if(completed.includes(key)){
+      el.classList.add("done");
+      el.innerHTML = name + "<br><small>Selesai</small>";
+      return;
+    }
+
+    if(test === key && status === "RUNNING"){
+      el.classList.add("active");
+      el.innerHTML = name + "<br><small>Sedang berlangsung</small>";
+      return;
+    }
+
+    if(test === key && status === "FINISHED"){
+      el.classList.add("done");
+      el.innerHTML = name + "<br><small>Selesai</small>";
+      return;
+    }
+
+    if(test === key && status === "WAITING"){
+      el.innerHTML = name + "<br><small>Menunggu dimulai</small>";
+      return;
+    }
+
+    el.innerHTML = name + "<br><small>Menunggu</small>";
+  });
+}
+
+if(participant)initParticipant();else show("loginView");
+</script>
+<div id="reviewModal" class="modal hidden">
+  <div class="modal-box">
+    <h2>Review Jawaban</h2>
+    <p>Periksa kembali sebelum mengumpulkan tes.</p>
+
+    <div class="review-row">
+      <span>Total Soal</span>
+      <b id="reviewTotal">0</b>
+    </div>
+    <div class="review-row">
+      <span>Sudah Dijawab</span>
+      <b id="reviewAnswered">0</b>
+    </div>
+    <div class="review-row">
+      <span>Belum Dijawab</span>
+      <b id="reviewUnanswered">0</b>
+    </div>
+
+    <div class="modal-actions">
+      <button class="secondary" onclick="closeReview()">Kembali</button>
+      <button onclick="confirmSubmit()">Kumpulkan Tes</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+
+<!-- localStorage.removeItem("completedTests");
+localStorage.removeItem("answers");
+localStorage.removeItem("flags");
+localStorage.removeItem("participant");
+localStorage.clear();
+location.reload();
+location.reload(); -->
